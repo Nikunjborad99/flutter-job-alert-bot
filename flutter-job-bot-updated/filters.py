@@ -55,7 +55,9 @@ def experience_ok(text):
  if low <= 3.5 and high >= 3:
  return True
  else:
- minimum = float(match.group(3) or match.group(4))
+ minimum = float(
+ match.group(3) or match.group(4)
+ )
 
  if minimum <= 3.5:
  return True
