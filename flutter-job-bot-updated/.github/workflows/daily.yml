@@ -1,27 +1,41 @@
+
 name: Daily Flutter Job Alerts
+
 on:
   schedule:
-    # 09:00 IST = 03:30 UTC (India has no DST)
+    # 09:00 IST = 03:30 UTC
     - cron: '30 3 * * *'
   workflow_dispatch:
+
 permissions:
   contents: write
+
 concurrency:
   group: flutter-job-alerts
   cancel-in-progress: false
+
 jobs:
   notify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           persist-credentials: true
-      - uses: actions/setup-python@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -r requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        working-directory: flutter-job-bot-updated
+
       - name: Send job alerts
+        working-directory: flutter-job-bot-updated
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -29,13 +43,14 @@ jobs:
           IMAP_APP_PASSWORD: ${{ secrets.IMAP_APP_PASSWORD }}
           IMAP_HOST: imap.gmail.com
         run: python bot.py
+
       - name: Persist deduplication history
         if: always()
         run: |
-          if ! git diff --quiet -- sent_jobs.json; then
+          if ! git diff --quiet -- flutter-job-bot-updated/sent_jobs.json; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add sent_jobs.json
+            git add flutter-job-bot-updated/sent_jobs.json
             git commit -m 'Update sent job history'
             git push
           fi
