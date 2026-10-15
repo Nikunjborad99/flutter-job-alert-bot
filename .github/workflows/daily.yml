@@ -1,0 +1,53 @@
+
+name: Daily Flutter Job Alerts
+
+on:
+  schedule:
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: flutter-job-alerts
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        working-directory: flutter-job-bot-updated
+        run: pip install -r requirements.txt
+
+      - name: Send job alerts
+        working-directory: flutter-job-bot-updated
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          IMAP_USER: ${{ secrets.IMAP_USER }}
+          IMAP_APP_PASSWORD: ${{ secrets.IMAP_APP_PASSWORD }}
+          IMAP_HOST: imap.gmail.com
+        run: python bot.py
+
+      - name: Save sent jobs history
+        if: always()
+        run: |
+          git add flutter-job-bot-updated/sent_jobs.json
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Update sent jobs history"
+            git push
+          fi
