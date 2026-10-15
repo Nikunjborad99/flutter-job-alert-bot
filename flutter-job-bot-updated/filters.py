@@ -45,23 +45,20 @@ def experience_ok(text):
  """Accept unspecified experience or requirements compatible with 3 years."""
  matches = list(YEARS.finditer(text))
 
- if not matches:return True
+if not matches:return True
 
- for match in matches:
- if match.group(1) is not None:
+for match in matches:
+if match.group(1) is not None:
  low = float(match.group(1))
  high = float(match.group(2))
 
- if low <= 3 and high >= 3:
- return True
- else:
- minimum_text = match.group(3) or match.group(4)
- minimum = float(minimum_text)
+if low <= 3 and high >= 3:return True
+else:minimum_text = match.group(3) or match.group(4)
+minimum = float(minimum_text)
 
- if minimum <= 3:
- return True
+if minimum <= 3:return True
 
- return False
+return False
 
 def hourly_ok(text):
  """Reject explicitly stated hourly rates below $15."""
