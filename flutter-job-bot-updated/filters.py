@@ -5,8 +5,8 @@ import re
 ROLE = re.compile(r"\bflutter\b", re.I)
 
 CONTRACT = re.compile(
- r"\b(freelanc(?:e|er|ing)|contract(?:or|ual)?|independent contractor|"
- r"project.based|fixed.price|hourly contract)\b",
+ r"\b(freelanc(?:e|er|ing)|contract(?:or|ual)?|"
+ r"independent contractor|project.based|fixed.price|hourly contract)\b",
  re.I,
  )
 
@@ -16,8 +16,9 @@ FULLTIME = re.compile(
  )
 
 RESTRICTED = re.compile(
- r"\b(?:us|usa|united states|canada|uk|united kingdom|europe|eu|"
- r"emea|latam|australia)\s+(?:only|based|residents? only)\b|"
+ r"\b(?:us|usa|united states|canada|uk|united kingdom|"
+ r"europe|eu|emea|latam|australia)\s+"
+ r"(?:only|based|residents? only)\b|"
  r"\bmust\s+(?:be\s+)?(?:located|based|reside)\s+in\b",
  re.I,
  )
@@ -41,7 +42,7 @@ HOURLY = re.compile(
  )
 
 def experience_ok(text):
- """Accept unspecified experience or requirements compatible with 3+ years."""
+ """Accept unspecified experience or requirements compatible with 3 years."""
  matches = list(YEARS.finditer(text))
 
  if not matches:
@@ -52,14 +53,13 @@ def experience_ok(text):
  low = float(match.group(1))
  high = float(match.group(2))
 
- if low <= 3.5 and high >= 3:
+ if low <= 3 and high >= 3:
  return True
  else:
- minimum = float(
- match.group(3) or match.group(4)
- )
+ minimum_text = match.group(3) or match.group(4)
+ minimum = float(minimum_text)
 
- if minimum <= 3.5:
+ if minimum <= 3:
  return True
 
  return False
@@ -73,12 +73,13 @@ def hourly_ok(text):
 
  for match in matches:
  if match.group(2) is not None:
+ minimum = float(match.group(1))
  maximum = float(match.group(2))
- if maximum < 15:
- continue
- return True
 
- rate = float(match.group(3) or match.group(1))
+ if maximum >= 15:
+ return True
+ else:
+ rate = float(match.group(3))
  if rate >= 15:
  return True
 
