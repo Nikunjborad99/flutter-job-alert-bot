@@ -45,8 +45,7 @@ def experience_ok(text):
  """Accept unspecified experience or requirements compatible with 3 years."""
  matches = list(YEARS.finditer(text))
 
- if not matches:
- return True
+ if not matches:return True
 
  for match in matches:
  if match.group(1) is not None:
