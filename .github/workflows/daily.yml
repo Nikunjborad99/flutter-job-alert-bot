@@ -3,7 +3,7 @@ name: Daily Flutter Job Alerts
 
 on:
   schedule:
-    - cron: '30 3 * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
